@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serializable;
+
 @Data
 @TableName("tb_hotel")
-public class Hotel {
+public class Hotel{
     @TableId(type = IdType.INPUT)
     private Long id;
     private String name;
