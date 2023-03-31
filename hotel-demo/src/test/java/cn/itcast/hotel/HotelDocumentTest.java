@@ -5,6 +5,7 @@ import cn.itcast.hotel.pojo.HotelDoc;
 import cn.itcast.hotel.service.IHotelService;
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
@@ -18,10 +19,14 @@ import org.elasticsearch.common.xcontent.XContentType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SpringBootTest
 public class HotelDocumentTest {
@@ -74,6 +79,33 @@ public class HotelDocumentTest {
     void testDeleteDocumentById() throws IOException{
         DeleteRequest request = new DeleteRequest("hotel","61083");
         client.delete(request,RequestOptions.DEFAULT);
+    }
+
+    @Test
+    void testBulkRequest() throws IOException {
+        // 1.创建Request
+        BulkRequest request = new BulkRequest();
+        // 2.准备参数，添加多个新增的Request
+            // 批量查询酒店数据
+        List<Hotel> list = hotelService.list();
+            // 转换为文档类型HotelDoc
+            //批量添加
+        list.stream().map((item) -> {
+            HotelDoc hotelDoc = new HotelDoc(item);
+            request.add(new IndexRequest("hotel")
+                    .id(hotelDoc.getId().toString())
+                    .source(JSON.toJSONString(hotelDoc), XContentType.JSON));
+            return hotelDoc;
+        }).collect(Collectors.toList());
+            //批量删除
+//        list.stream().map((item) -> {
+//            HotelDoc hotelDoc = new HotelDoc(item);
+//            request.add(new DeleteRequest("hotel")
+//                    .id(hotelDoc.getId().toString()));
+//            return hotelDoc;
+//        }).collect(Collectors.toList());
+        // 3.发送请求
+        client.bulk(request,RequestOptions.DEFAULT);
     }
 
     @BeforeEach
