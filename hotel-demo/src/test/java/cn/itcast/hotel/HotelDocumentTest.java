@@ -5,6 +5,7 @@ import cn.itcast.hotel.pojo.HotelDoc;
 import cn.itcast.hotel.service.IHotelService;
 import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpHost;
+import org.elasticsearch.action.delete.DeleteRequest;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -67,6 +68,12 @@ public class HotelDocumentTest {
         );
         //3。更新文档
         UpdateResponse response = client.update(request, RequestOptions.DEFAULT);
+    }
+
+    @Test
+    void testDeleteDocumentById() throws IOException{
+        DeleteRequest request = new DeleteRequest("hotel","61083");
+        client.delete(request,RequestOptions.DEFAULT);
     }
 
     @BeforeEach
