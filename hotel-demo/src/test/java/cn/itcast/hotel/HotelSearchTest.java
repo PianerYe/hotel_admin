@@ -16,6 +16,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.elasticsearch.search.sort.SortOrder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -80,12 +81,35 @@ public class HotelSearchTest {
         boolQuery.must(QueryBuilders.termQuery("city","上海"))
                 .filter(QueryBuilders.rangeQuery("price").gte(200).lte(250));
         request.source().query(boolQuery);
-
         // 利用链式编程
         /*request.source()
                 .query(QueryBuilders.boolQuery()
                     .must(QueryBuilders.termQuery("city", "上海"))
                     .filter(QueryBuilders.rangeQuery("price").gte(200).lte(250)));*/
+        //3. 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        //4. 解析响应
+        handleResponse(response);
+    }
+
+    @Test
+    void testPageAndSort() throws IOException {
+        // 页码，每页大小
+        int page = 2,size = 5;
+        //1.准备Request对象
+        SearchRequest request = new SearchRequest("hotel");
+        //2。准备DSL
+//        //2.1 query
+//        request.source().query(QueryBuilders.matchAllQuery());
+//        //2.2 排序sort
+//        request.source().sort("price", SortOrder.ASC);
+//        //2.3 分页from size
+//        request.source().from( (page - 1) * size).size(size);
+        // 链式编程
+        request.source()
+                .query(QueryBuilders.matchAllQuery())
+                .sort("price",SortOrder.ASC)
+                .from((page - 1) * size).size(size);
         //3. 发送请求
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
         //4. 解析响应
