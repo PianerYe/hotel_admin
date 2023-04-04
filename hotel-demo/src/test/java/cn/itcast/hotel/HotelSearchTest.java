@@ -11,6 +11,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -37,7 +38,64 @@ public class HotelSearchTest {
         request.source().query(QueryBuilders.matchAllQuery());
         //3. 发送请求
         SearchResponse response = client.search(request, RequestOptions.DEFAULT);
-        //4. 解析相应
+        //4. 解析响应
+        handleResponse(response);
+    }
+
+    @Test
+    void testMatch() throws IOException {
+        //1.准备Request对象
+        SearchRequest request = new SearchRequest("hotel");
+        //2。准备DSL
+        //request.source().query(QueryBuilders.matchQuery("all","如家"));
+        request.source().query(QueryBuilders.multiMatchQuery("如家","name","business"));
+        //3. 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        //4. 解析响应
+        handleResponse(response);
+    }
+
+    @Test
+    void testTerm() throws IOException {
+        //1.准备Request对象
+        SearchRequest request = new SearchRequest("hotel");
+        //2。准备DSL
+        //request.source().query(QueryBuilders.termQuery("city","上海"));
+        request.source().query(QueryBuilders.rangeQuery("price").gte(100).lte(150));
+        //3. 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        //4. 解析响应
+        handleResponse(response);
+    }
+
+    @Test
+    void testBool() throws IOException {
+        //1.准备Request对象
+        SearchRequest request = new SearchRequest("hotel");
+        //2。准备DSL
+        //2.1 准备BooleanQuery
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        //2.2 添加term
+        //2.3 添加filter
+        boolQuery.must(QueryBuilders.termQuery("city","上海"))
+                .filter(QueryBuilders.rangeQuery("price").gte(200).lte(250));
+        request.source().query(boolQuery);
+
+        // 利用链式编程
+        /*request.source()
+                .query(QueryBuilders.boolQuery()
+                    .must(QueryBuilders.termQuery("city", "上海"))
+                    .filter(QueryBuilders.rangeQuery("price").gte(200).lte(250)));*/
+        //3. 发送请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        //4. 解析响应
+        handleResponse(response);
+    }
+
+
+
+    private void handleResponse(SearchResponse response) {
+        //4. 解析响应
         SearchHits searchHits = response.getHits();
         //4.1. 获取总条数
         long total = searchHits.getTotalHits().value;
