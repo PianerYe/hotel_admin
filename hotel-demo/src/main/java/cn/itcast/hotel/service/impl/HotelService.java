@@ -12,18 +12,16 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHotelService {
@@ -38,15 +36,9 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
             SearchRequest request = new SearchRequest("hotel");
             //2. 准备DSL
             //2.1 query
-            String key = params.getKey();
-            if (key == null || "".equals(key)){
-                request.source().query(QueryBuilders.matchAllQuery());
-            }else {
-                request.source()
-                        .query(QueryBuilders.matchQuery(
-                                "all",key
-                        ));
-            }
+            // 构建BooleanQuery
+            buildBasicQuery(params,request);
+
             //2.2 分页
             int page = params.getPage();
             int size = params.getSize();
@@ -58,6 +50,40 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private void buildBasicQuery(RequestParams params, SearchRequest request) {
+        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+        // 关键字搜索
+        String key = params.getKey();
+        String city = params.getCity();
+        String brand = params.getBrand();
+        String starName = params.getStarName();
+        Integer minPrice = params.getMinPrice();
+        Integer maxPrice = params.getMaxPrice();
+        if (key == null || "".equals(key)){
+            boolQuery.must(QueryBuilders.matchAllQuery());
+        }else {
+            boolQuery.must(
+                    QueryBuilders.matchQuery("all",key));
+        }
+        // 城市条件
+        if(city != null && !"".equals(city)){
+            boolQuery.filter(QueryBuilders.termQuery("city",city));
+        }
+        // 品牌条件
+        if(brand != null && !"".equals(brand)){
+            boolQuery.filter(QueryBuilders.termQuery("brand",brand));
+        }
+        // 星级条件
+        if(starName != null && !"".equals(starName)){
+            boolQuery.filter(QueryBuilders.termQuery("starName",starName));
+        }
+        // 价格
+        if (maxPrice != null && minPrice != null){
+            boolQuery.filter(QueryBuilders.rangeQuery("price").gte(minPrice).lte(maxPrice));
+        }
+        request.source().query(boolQuery);
     }
 
     private PageResult handleResponse(SearchResponse response) {
