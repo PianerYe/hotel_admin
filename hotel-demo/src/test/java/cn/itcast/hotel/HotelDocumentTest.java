@@ -108,6 +108,21 @@ public class HotelDocumentTest {
         client.bulk(request,RequestOptions.DEFAULT);
     }
 
+    @Test
+    void testAddIsADRequest() throws IOException {
+//        UpdateRequest request = new UpdateRequest("hotel","1908594080");
+//        UpdateRequest request = new UpdateRequest("hotel","1913922369");
+//        UpdateRequest request = new UpdateRequest("hotel","1989806195");
+        UpdateRequest request = new UpdateRequest("hotel","2022598930");
+        //2. 准备一个参数，每两个参数为一对key value
+        request.doc(
+                "isAD",true
+        );
+        //3。更新文档
+        UpdateResponse response = client.update(request, RequestOptions.DEFAULT);
+
+    }
+
     @BeforeEach
     void setUp(){
         this.client = new RestHighLevelClient(RestClient.builder(
