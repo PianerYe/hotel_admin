@@ -113,6 +113,12 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
             String json = hit.getSourceAsString();
             // 反序列化
             HotelDoc hotelDoc = JSON.parseObject(json, HotelDoc.class);
+            // 获取排序值
+            Object[] sortValues = hit.getSortValues();
+            if (sortValues.length>0){
+                Object sortValue = sortValues[0];
+                hotelDoc.setDistance(sortValue);
+            }
             hotels.add(hotelDoc);
         }
         //4.4 封装返回
