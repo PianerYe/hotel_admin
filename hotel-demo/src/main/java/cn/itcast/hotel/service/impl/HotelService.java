@@ -74,9 +74,10 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
     }
 
     @Override
-    public Map<String, List<String>> filters() {
+    public Map<String, List<String>> filters(RequestParams params) {
         try {
             SearchRequest request = new SearchRequest("hotel");
+            buildBasicQuery(params,request);
             request.source().size(0);
             buildAggregation(request,"brandAgg","brand",100);
             buildAggregation(request,"cityAgg","city",100);
@@ -88,9 +89,9 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
             List<String> brandList = getAggByName(aggregations,"brandAgg");
             List<String> cityList = getAggByName(aggregations,"cityAgg");
             List<String> starNameList = getAggByName(aggregations,"starNameAgg");
-            result.put("品牌",brandList);
-            result.put("城市",cityList);
-            result.put("星级",starNameList);
+            result.put("brand",brandList);
+            result.put("city",cityList);
+            result.put("starName",starNameList);
 
             return result;
         } catch (IOException e) {

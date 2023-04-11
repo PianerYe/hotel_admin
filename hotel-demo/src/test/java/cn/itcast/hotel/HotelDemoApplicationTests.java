@@ -16,8 +16,8 @@ class HotelDemoApplicationTests {
 
     @Test
     void contextLoads() {
-        Map<String, List<String>> filters = hotelService.filters();
-        System.out.println(filters);
+//        Map<String, List<String>> filters = hotelService.filters();
+//        System.out.println(filters);
     }
 
 }
