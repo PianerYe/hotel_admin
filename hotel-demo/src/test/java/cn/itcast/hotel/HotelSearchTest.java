@@ -8,6 +8,7 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
@@ -20,6 +21,10 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
 import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -196,6 +201,33 @@ public class HotelSearchTest {
                 }
             }
 
+    }
+
+    @Test
+    void testSuggest() throws IOException {
+        // 1. 准备request
+        SearchRequest request = new SearchRequest("hotel");
+        //2。准备DSL
+        request.source().suggest(new SuggestBuilder()
+                .addSuggestion("suggestion",
+                        SuggestBuilders.completionSuggestion("suggestion")
+                                .prefix("hz")
+                                .skipDuplicates(true)
+                                .size(10)));
+        //3.发起请求
+        SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+        //4.解析结果
+        Suggest suggest = response.getSuggest();
+        //根据补全查询名称，获取补全结果
+        CompletionSuggestion suggestions
+                = suggest.getSuggestion("suggestion");
+        //获取potions
+        List<CompletionSuggestion.Entry.Option> options = suggestions.getOptions();
+        //遍历
+        for (CompletionSuggestion.Entry.Option option : options) {
+            String text = option.getText().toString();
+            System.out.println(text);
+        }
     }
 
     @BeforeEach
