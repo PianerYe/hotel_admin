@@ -27,6 +27,10 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.sort.SortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.Suggest;
+import org.elasticsearch.search.suggest.SuggestBuilder;
+import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.completion.CompletionSuggestion;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -94,6 +98,39 @@ public class HotelService extends ServiceImpl<HotelMapper, Hotel> implements IHo
             result.put("starName",starNameList);
 
             return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<String> getSuggestions(String prefix) {
+        try {
+            // 1. 准备request
+            SearchRequest request = new SearchRequest("hotel");
+            //2。准备DSL
+            request.source().suggest(new SuggestBuilder()
+                    .addSuggestion("suggestion",
+                            SuggestBuilders.completionSuggestion("suggestion")
+                                    .prefix(prefix)
+                                    .skipDuplicates(true)
+                                    .size(10)));
+            //3.发起请求
+            SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+            //4.解析结果
+            Suggest suggest = response.getSuggest();
+            //根据补全查询名称，获取补全结果
+            CompletionSuggestion suggestions
+                    = suggest.getSuggestion("suggestion");
+            //获取potions
+            List<CompletionSuggestion.Entry.Option> options = suggestions.getOptions();
+            List<String> list = new ArrayList<>(options.size());
+            //遍历
+            for (CompletionSuggestion.Entry.Option option : options) {
+                String text = option.getText().toString();
+                list.add(text);
+            }
+            return list;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
