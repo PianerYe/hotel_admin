@@ -38,8 +38,11 @@ public class HotelController {
 
     @PostMapping
     public void saveHotel(@RequestBody Hotel hotel){
+        double randomid = Math.random()*100000000;
+        long id = new Double(randomid).longValue();
+        System.out.println(id);
+        hotel.setId(id);
         hotelService.save(hotel);
-
         rabbitTemplate.convertAndSend(MqConstants.HOTEL_EXCHANGE,MqConstants.HOTEL_INSERT_KEY,hotel.getId());
     }
 
