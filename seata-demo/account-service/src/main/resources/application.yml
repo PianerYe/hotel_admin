@@ -22,4 +22,22 @@ logging:
     org.springframework.cloud.alibaba.seata.web: debug
     cn.itcast: debug
   pattern:
+<<<<<<< HEAD
     dateformat: MM-dd HH:mm:ss:SSS
+=======
+    dateformat: MM-dd HH:mm:ss:SSS
+seata:
+  registry:
+    type: nacos
+    nacos:
+      serverAddr: 127.0.0.1:8848
+      namespace: ""
+      group: DEFAULT_GROUP
+      application: seata-tc-server
+      username: nacos
+      password: nacos
+  txServiceGroup: seata-demo  # 事务组名称
+  service:
+    vgroupMapping:  # 事务组与cluster的映射关系
+      seata-demo: SH
+>>>>>>> 4e8a05f (seata基本框架搭建)
