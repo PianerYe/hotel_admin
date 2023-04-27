@@ -22,9 +22,6 @@ logging:
     org.springframework.cloud.alibaba.seata.web: debug
     cn.itcast: debug
   pattern:
-<<<<<<< HEAD
-    dateformat: MM-dd HH:mm:ss:SSS
-=======
     dateformat: MM-dd HH:mm:ss:SSS
 seata:
   registry:
@@ -40,4 +37,3 @@ seata:
   service:
     vgroupMapping:  # 事务组与cluster的映射关系
       seata-demo: SH
->>>>>>> 4e8a05f (seata基本框架搭建)
