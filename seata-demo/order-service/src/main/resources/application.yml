@@ -27,7 +27,7 @@ seata:
   registry:
     type: nacos
     nacos:
-      serverAddr: 127.0.0.1:8848
+      serverAddr: localhost:8848
       namespace: ""
       group: DEFAULT_GROUP
       application: seata-tc-server
@@ -37,3 +37,4 @@ seata:
   service:
     vgroupMapping:  # 事务组与cluster的映射关系
       seata-demo: SH
+  data-source-proxy-mode: XA
